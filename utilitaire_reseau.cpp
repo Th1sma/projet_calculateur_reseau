@@ -1,3 +1,9 @@
+/*
+   Nom du fichier : utilitaire_reseau.cpp
+   Auteur : Mathis NIVEAU
+   Date de création : 2023
+*/
+
 // Utilisation des algorithmes de la STL sur le conteneur vector
 #include <sstream>
 #include <iostream>
