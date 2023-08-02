@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <bitset>
+#include <cmath>
 
 // Espace de nom utilisé
 using namespace std;
@@ -110,16 +111,16 @@ int main()
     bitset<8> add_res3, add_res2, add_res1, add_res0;
     bitset<8> add_hote3, add_hote2, add_hote1, add_hote0;
 
-    // plage d'adresse réseau
-    bitset<8> adresse_reseau_3;
-    bitset<8> adresse_reseau_2;
-    bitset<8> adresse_reseau_1;
-    bitset<8> adresse_reseau_0;
+    // Variable de calcul pour la partie résolution de réseau
+    std::bitset<32> adresse_ip_bits;
+    std::bitset<32> masque_bits;
 
-    bitset<8> plage_max_reseau;
-    bitset<8> plage_min_reseau;
+    std::bitset<32> adresse_diffusion;
+    std::bitset<32> premiere_adresse_util;
+    std::bitset<32> derniere_adresse_util;
 
-    unsigned int nombre_hote;
+    int nb_bit_adr_hote;
+    int nb_hotes;
 
     // Boucle de gestion du menu
     int fin = 0;
@@ -197,60 +198,57 @@ int main()
 
         case 2:
 
-            // Saisie de l'adresse IP réseau
-            cout << "\033[1;31mEntrez une adresse IP réseau : \033[0m" << endl;
+            // Saisie de l'adresse IP réseau et du masque
+            cout << "\033[1;31mEntrez une adresse IP reseau : \033[0m" << endl;
             cin >> adresse_ip;
-            cout << "\033[1;31mEntrez le masque de sous réseau : \033[0m" << endl;
+            cout << "\033[1;31mEntrez le masque de sous-reseau : \033[0m" << endl;
             cin >> masque_ip;
             cout << endl;
 
-            // Découpage en mémoire
+            // Découpage en mémoire de l'adresse IP
             iss1 = istringstream(adresse_ip);
             iss1 >> i3 >> c >> i2 >> c >> i1 >> c >> i0;
-            // Découpe masque
+
+            // Découpage en mémoire du masque
             iss2 = istringstream(masque_ip);
             iss2 >> m3 >> c >> m2 >> c >> m1 >> c >> m0;
 
-            // convertion pour adresse IP
-            ad3 = convertion_ip_binaire(i3);
-            ad2 = convertion_ip_binaire(i2);
-            ad1 = convertion_ip_binaire(i1);
-            ad0 = convertion_ip_binaire(i0);
+            // Conversion des parties de l'adresse IP et du masque en chaînes binaires
+            adresse_ip_bits = (i3 << 24) | (i2 << 16) | (i1 << 8) | i0 + 1;
+            masque_bits = (m3 << 24) | (m2 << 16) | (m1 << 8) | m0;
 
-            // convertion pour masque sous réseau
-            mas3 = convertion_ip_binaire(m3);
-            mas2 = convertion_ip_binaire(m2);
-            mas1 = convertion_ip_binaire(m1);
-            mas0 = convertion_ip_binaire(m0);
+            // Calculs sur l'adresse IP et le masque
+            nb_bit_adr_hote = 32 - masque_bits.count();
+            nb_hotes = std::pow(2, nb_bit_adr_hote) - 2;
 
-            // calcul de l'adresse réseau
-            adresse_reseau_3 = op_et(ad3, mas3);
-            adresse_reseau_2 = op_et(ad2, mas2);
-            adresse_reseau_1 = op_et(ad1, mas1);
-            adresse_reseau_0 = op_et(ad0, mas0);
-
-            // calcul de la plage d'adresses
-            plage_min_reseau = op_non_ip(adresse_reseau_0, mas0);
-            plage_max_reseau = plage_min_reseau;
-            plage_max_reseau |= ~(mas0);
-
-            // calcul du nombre de machines possibles
-            nombre_hote = plage_max_reseau.to_ulong() - plage_min_reseau.to_ulong() + 1;
-
+            adresse_diffusion = adresse_ip_bits | (~masque_bits);
+            
+            // ATTENTION ERREUR SUR LA PREMIERE ADRESSE SUR CERTAINS CALCULS
+            premiere_adresse_util = adresse_ip_bits;
+            premiere_adresse_util.set(31, 1);
+            
             // Affichage des résultats
-            cout << "\033[1;31m=======Adresse reseau=======\033[0m" << endl;
-            cout << "\033[0;33mAdresse reseau (binaire) = \033[0m";
-            cout << adresse_reseau_3 << "." << adresse_reseau_2 << "." << adresse_reseau_1 << "." << adresse_reseau_0 << endl;
-            cout << "\033[0;33mAdresse reseau (decimal) = \033[0m";
-            cout << convertion_bin_dec(adresse_reseau_3) << "." << convertion_bin_dec(adresse_reseau_2) << "."
-                 << convertion_bin_dec(adresse_reseau_1) << "." << convertion_bin_dec(adresse_reseau_0) << endl;
-
             cout << "\033[1;31m=======Plage d'adresses=======\033[0m" << endl;
             cout << "\033[0;33mPlage d'adresses possibles : \033[0m";
-            cout << convertion_bin_dec(plage_min_reseau) << " - " << convertion_bin_dec(plage_max_reseau) << endl;
+            cout << ((premiere_adresse_util.to_ulong() >> 24) & 0xFF) << "."
+                 << ((premiere_adresse_util.to_ulong() >> 16) & 0xFF) << "."
+                 << ((premiere_adresse_util.to_ulong() >> 8) & 0xFF) << "."
+                 << (premiere_adresse_util.to_ulong() & 0xFF);
+
+            cout << " - "
+                 << ((adresse_diffusion.to_ulong() >> 24) & 0xFF) << "."
+                 << ((adresse_diffusion.to_ulong() >> 16) & 0xFF) << "."
+                 << ((adresse_diffusion.to_ulong() >> 8) & 0xFF) << "."
+                 << (adresse_diffusion.to_ulong() & 0xFF) - 1 << endl;
+
+            cout << "\033[0;33mAdresse de diffusion : \033[0m"
+                 << ((adresse_diffusion.to_ulong() >> 24) & 0xFF) << "."
+                 << ((adresse_diffusion.to_ulong() >> 16) & 0xFF) << "."
+                 << ((adresse_diffusion.to_ulong() >> 8) & 0xFF) << "."
+                 << (adresse_diffusion.to_ulong() & 0xFF) << endl;
 
             cout << "\033[1;31m=======Nombre de machines possibles=======\033[0m" << endl;
-            cout << "\033[0;33mNombre de machines possibles : \033[0m" << nombre_hote << endl;
+            cout << "\033[0;33mNombre de machines possibles : \033[0m" << nb_hotes << endl;
 
             break;
 
