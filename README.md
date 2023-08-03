@@ -26,7 +26,7 @@ Le calculateur de réseau propose les fonctionnalités suivantes :
 
 ## Remarque
 
-Veuillez noter que ce calculateur de réseau peut nécessiter des améliorations ou des corrections supplémentaires.
+Veuillez noter que ce calculateur de réseau peut nécessiter des améliorations ou des corrections supplémentaires en particulier sur la partie **Résolution d'Adresse Réseau** qui n'est pas fonctionnel à 100%.
 
 ## Auteur
 
