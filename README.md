@@ -30,5 +30,5 @@ Veuillez noter que ce calculateur de réseau peut nécessiter des améliorations
 
 ## Auteur
 
-Ce projet a été développé par Thisma17.
+Ce projet a été développé par Th1sma.
 
